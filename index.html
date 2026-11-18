@@ -13,17 +13,17 @@ function set(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}
 const QZ={};
 function qk(t){let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return String(h)}
 function mastery(d){
-  let st={};try{st=JSON.parse(localStorage.getItem('dsStats:'+d.id)||'{}')}catch(e){}
+  let st={};try{st=JSON.parse(localStorage.getItem('dsScores:'+d.id)||'{}')}catch(e){}
   const q=(window.QUIZ&&window.QUIZ.id===d.id)?window.QUIZ.q:null;
   const total=q?q.length:d.count;
-  let seen=0,good=0;
-  if(q)q.forEach(x=>{const v=st[qk(x[1])];if(v!==undefined){seen++;if(v===1)good++}});
-  const pct=seen?Math.round(good/seen*100):0;
+  let seen=0,pts=0,acq=0;
+  if(q)q.forEach(x=>{const v=st[qk(x[1])];if(v!==undefined){seen++;pts+=v;if(v>=3)acq++}});
+  const pct=seen?Math.round(pts/(3*seen)*100):0;
   const cov=total?Math.round(seen/total*100):0;
   const lv=seen===0?-1:pct>=75?2:pct>=40?1:0;
   const lab=seen===0?'Pas encore commencé':['À retravailler','En progrès','Maîtrisé'][lv];
   const few=seen>0&&cov<30?' · encore peu de questions vues':'';
-  return `<div class="mast"><div class="l"><span><span class="dot ${lv<0?'':'lv'+lv}" style="${lv<0?'background:var(--line)':''}"></span><b class="${lv<0?'':'t'+lv}">Maîtrise : ${pct} %</b> · ${lab}</span><span style="color:var(--mute)">${good}/${seen} justes</span></div><div class="b"><i class="lv${Math.max(lv,0)}" style="width:${seen?pct:0}%"></i></div><div class="l" style="margin:6px 0 0;color:var(--mute)"><span>Couverture : ${seen}/${total} questions vues (${cov} %)${few}</span></div></div>`;
+  return `<div class="mast"><div class="l"><span><span class="dot ${lv<0?'':'lv'+lv}" style="${lv<0?'background:var(--line)':''}"></span><b class="${lv<0?'':'t'+lv}">Maîtrise : ${pct} %</b> · ${lab}</span><span style="color:var(--mute)">${acq} acquises</span></div><div class="b"><i class="lv${Math.max(lv,0)}" style="width:${seen?pct:0}%"></i></div><div class="l" style="margin:6px 0 0;color:var(--mute)"><span>Acquise = 3 bonnes réponses · ${seen}/${total} questions vues (${cov} %)${few}</span></div></div>`;
 }
 function render(){
   const passed=get(),todo=DS.filter(d=>!passed.includes(d.id)),done=DS.filter(d=>passed.includes(d.id));
