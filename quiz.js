@@ -2,7 +2,7 @@
 const D=window.QUIZ,CH=D.chapters,Q=D.q,app=document.getElementById('app');
 let state={};
 function qk(t){let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return String(h)}
-function rec(item,ok){try{const k='dsScores:'+D.id;const o=JSON.parse(localStorage.getItem(k)||'{}');const key=qk(item[1]);const v=o[key]||0;o[key]=ok?Math.min(2,Math.min(2,v)+1):Math.max(0,v-1);localStorage.setItem(k,JSON.stringify(o))}catch(e){}}
+function rec(item,ok){try{const k='dsScores:'+D.id;const o=JSON.parse(localStorage.getItem(k)||'{}');const key=qk(item[1]);const v=o[key]||0;o[key]=ok?Math.min(2,Math.min(2,v)+1):0;localStorage.setItem(k,JSON.stringify(o))}catch(e){}}
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 function home(){
   const counts=CH.map((_,i)=>Q.filter(q=>q[0]===i).length);
