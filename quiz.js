@@ -34,20 +34,41 @@ function show(){
 }
 function answer(btn,ok,good,exp,item){
   document.querySelectorAll('.opt').forEach(b=>{b.disabled=true;if(b.textContent===good)b.classList.add('ok')});
-  if(ok)state.score++;else{btn.classList.add('ko');state.wrong.push(item)}
+  if(ok)state.score++;else{btn.classList.add('ko');state.wrong.push({item,picked:btn.textContent})}
   document.getElementById('fb').innerHTML=`<div class="exp"><b class="${ok?'g':'r'}">${ok?'Correct !':'Raté.'}</b> ${exp}</div>`;
   const last=state.i+1>=state.pool.length;
   document.getElementById('nx').innerHTML=`<button class="btn">${last?'Voir le résultat':'Suivant'}</button>`;
   document.querySelector('#nx button').onclick=()=>{state.i++;show()};
   document.getElementById('nx').scrollIntoView({behavior:'smooth',block:'end'});
 }
+function esc(t){return String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function buildPrompt(){
+  const {pool,score,wrong}=state;
+  const byCh={};wrong.forEach(w=>{(byCh[w.item[0]]=byCh[w.item[0]]||[]).push(w)});
+  let t=`Je viens de faire un quiz de révision « ${D.title} » : ${score}/${pool.length}.\nVoici les questions que j'ai ratées. Fais-moi un résumé de cours ciblé sur ces notions (en français, définitions, points clés, pièges classiques, mini-exemples), en t'appuyant sur les cours du projet.\n`;
+  Object.keys(byCh).forEach(c=>{t+=`\n## ${CH[c]}\n`;byCh[c].forEach(w=>{t+=`- Q : ${w.item[1]}\n  Ma réponse : ${w.picked}\n  Bonne réponse : ${w.item[2]}\n  Rappel : ${w.item[4]}\n`})});
+  return t;
+}
+function copy(t){
+  return (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(t):Promise.reject()).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(e){}ta.remove();
+  });
+}
 function end(){
   const {pool,score,wrong}=state,pct=Math.round(score/pool.length*100);
+  const byCh={};wrong.forEach(w=>{(byCh[w.item[0]]=byCh[w.item[0]]||[]).push(w)});
+  const chs=Object.keys(byCh).sort((a,b)=>byCh[b].length-byCh[a].length);
+  const point=wrong.length?`<div class="card"><h2>Point sur tes erreurs</h2>
+    <p class="sub">${wrong.length} raté${wrong.length>1?'es':'e'} — à retravailler en priorité : <b>${chs.slice(0,3).map(c=>CH[c]+' ('+byCh[c].length+')').join(', ')}</b></p>
+    ${chs.map(c=>`<div class="tag" style="margin-top:10px">${CH[c]} · ${byCh[c].length}</div>`+byCh[c].map(w=>`<div class="wrong"><b>${esc(w.item[1])}</b>Ta réponse : ${esc(w.picked)}<br>✔ ${esc(w.item[2])}<br><span style="color:var(--mute)">${esc(w.item[4])}</span></div>`).join('')).join('')}</div>
+    <div class="card"><h2>Résumé de cours</h2><p class="sub">Je peux générer un résumé de cours ciblé sur ces erreurs. Copie la demande, puis colle-la dans Claude (projet Scolaire).</p>
+    <button class="btn" id="cp">Copier la demande de résumé</button><a class="btn sec" href="https://claude.ai/new" target="_blank" rel="noopener">Ouvrir Claude</a></div>
+    <button class="btn" id="rw" style="margin-bottom:10px">Refaire mes erreurs</button>`:`<div class="card"><p class="center">Aucune erreur, rien à résumer 👌</p></div>`;
   app.innerHTML=`<div class="card"><h2>Résultat</h2><div class="score">${score}/${pool.length}</div>
-  <p class="center">${pct}% — ${pct>=80?'Solide.':pct>=60?'Pas mal, revois les erreurs.':'À retravailler, refais les erreurs.'}</p></div>
-  ${wrong.length?`<div class="card"><h2>À revoir (${wrong.length})</h2>${wrong.map(w=>`<div class="wrong"><b>${w[1]}</b>→ ${w[2]}</div>`).join('')}</div><button class="btn" id="rw">Refaire mes erreurs</button>`:''}
+  <p class="center">${pct}% — ${pct>=80?'Solide.':pct>=60?'Pas mal, revois les erreurs.':'À retravailler, refais les erreurs.'}</p></div>${point}
   <button class="btn sec" id="hm">Recommencer</button><a class="btn sec" href="./">Retour aux matières</a>`;
-  if(wrong.length)document.getElementById('rw').onclick=()=>start(shuffle(wrong));
+  if(wrong.length){document.getElementById('rw').onclick=()=>start(shuffle(wrong.map(w=>w.item)));
+    const cp=document.getElementById('cp');cp.onclick=()=>copy(buildPrompt()).then(()=>{cp.textContent='Copié ✔ — colle-le dans Claude'})}
   document.getElementById('hm').onclick=home;
 }
 home();
