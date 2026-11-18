@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#2f5d8a">
+<title>Révisions DS</title><link rel="stylesheet" href="style.css"></head>
+<body><div class="wrap"><h1>Révisions DS</h1><p class="sub">Matières à travailler</p><div id="list"></div><div id="done"></div></div>
+<script src="ds.js"></script>
+<script>
+const KEY="dsPasses";
+function get(){try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){return []}}
+function set(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}
+function render(){
+  const passed=get(),todo=DS.filter(d=>!passed.includes(d.id)),done=DS.filter(d=>passed.includes(d.id));
+  const L=document.getElementById('list');
+  L.innerHTML=todo.length?todo.map(d=>`<div class="card ds"><h3>${d.title}</h3><p>${d.desc} · ${d.count} questions</p>
+    <div class="row"><a class="btn" href="${d.page}">Réviser</a><button class="lnk" data-p="${d.id}">Matière passée</button></div></div>`).join(''):`<div class="card"><p class="center">Aucune matière à réviser 🎉</p></div>`;
+  L.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
+    if(b.dataset.c){set(get().concat(b.dataset.p));render();return}
+    b.dataset.c=1;b.textContent="Confirmer : effacer le quiz";b.classList.add('red');
+    setTimeout(()=>{if(b.isConnected){delete b.dataset.c;b.textContent="Matière passée";b.classList.remove('red')}},4000);
+  });
+  const D=document.getElementById('done');
+  D.innerHTML=done.length?`<p class="sub">Matières passées (quiz masqués)</p>`+done.map(d=>`<div class="card ds"><h3>${d.title}</h3><button class="lnk" data-r="${d.id}">Remettre dans la liste</button></div>`).join(''):'';
+  D.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{set(get().filter(x=>x!==b.dataset.r));render()});
+}
+render();
+</script></body></html>
