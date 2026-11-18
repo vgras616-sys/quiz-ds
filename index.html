@@ -17,8 +17,8 @@ function mastery(d){
   const q=(window.QUIZ&&window.QUIZ.id===d.id)?window.QUIZ.q:null;
   const total=q?q.length:d.count;
   let seen=0,pts=0,acq=0;
-  if(q)q.forEach(x=>{const v=st[qk(x[1])];if(v!==undefined){seen++;pts+=v;if(v>=3)acq++}});
-  const pct=seen?Math.round(pts/(3*seen)*100):0;
+  if(q)q.forEach(x=>{let v=st[qk(x[1])];if(v!==undefined){v=Math.min(2,v);seen++;pts+=v;if(v>=2)acq++}});
+  const pct=seen?Math.round(pts/(2*seen)*100):0;
   const cov=total?Math.round(seen/total*100):0;
   const lv=seen===0?-1:pct>=75?2:pct>=40?1:0;
   const lab=seen===0?'Pas encore commencé':['À retravailler','En progrès','Maîtrisé'][lv];
