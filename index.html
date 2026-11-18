@@ -23,7 +23,7 @@ function mastery(d){
   const lv=seen===0?-1:pct>=75?2:pct>=40?1:0;
   const lab=seen===0?'Pas encore commencé':['À retravailler','En progrès','Maîtrisé'][lv];
   const few=seen>0&&cov<30?' · encore peu de questions vues':'';
-  return `<div class="mast"><div class="l"><span><span class="dot ${lv<0?'':'lv'+lv}" style="${lv<0?'background:var(--line)':''}"></span><b class="${lv<0?'':'t'+lv}">Maîtrise : ${pct} %</b> · ${lab}</span><span style="color:var(--mute)">${acq} acquises</span></div><div class="b"><i class="lv${Math.max(lv,0)}" style="width:${seen?pct:0}%"></i></div><div class="l" style="margin:6px 0 0;color:var(--mute)"><span>Acquise = 3 bonnes réponses · ${seen}/${total} questions vues (${cov} %)${few}</span></div></div>`;
+  return `<div class="mast"><div class="l"><span><span class="dot ${lv<0?'':'lv'+lv}" style="${lv<0?'background:var(--line)':''}"></span><b class="${lv<0?'':'t'+lv}">Maîtrise : ${pct} %</b> · ${lab}</span></div><div class="b"><i class="lv${Math.max(lv,0)}" style="width:${seen?pct:0}%"></i></div><div class="l" style="margin:6px 0 0;color:var(--mute)"><span>${seen}/${total} questions vues (${cov} %)${few}</span></div></div>`;
 }
 function render(){
   const passed=get(),todo=DS.filter(d=>!passed.includes(d.id)),done=DS.filter(d=>passed.includes(d.id));
