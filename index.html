@@ -2,17 +2,31 @@
 <html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#2f5d8a">
-<title>Révisions DS</title><link rel="stylesheet" href="style.css"></head>
+<title>Révisions DS</title><link rel="stylesheet" href="style.css"><style>.mast{margin:0 0 12px}.mast .l{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}.mast .b{height:10px;background:var(--line);border-radius:5px;overflow:hidden}.mast .b i{display:block;height:100%;border-radius:5px;transition:width .3s}.lv0{background:var(--ko)}.lv1{background:#d9902f}.lv2{background:#5aa469}.lv3{background:var(--ok)}</style></head>
 <body><div class="wrap"><h1>Révisions DS</h1><p class="sub">Matières à travailler</p><div id="list"></div><div id="done"></div></div>
 <script src="ds.js"></script>
+<script src="data/procedes-fabrication.js"></script>
 <script>
 const KEY="dsPasses";
 function get(){try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){return []}}
 function set(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}
+const QZ={};
+function qk(t){let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return String(h)}
+function mastery(d){
+  let st={};try{st=JSON.parse(localStorage.getItem('dsStats:'+d.id)||'{}')}catch(e){}
+  const q=(window.QUIZ&&window.QUIZ.id===d.id)?window.QUIZ.q:null;
+  const total=q?q.length:d.count;
+  let seen=0,good=0;
+  if(q)q.forEach(x=>{const v=st[qk(x[1])];if(v!==undefined){seen++;if(v===1)good++}});
+  const pct=total?Math.round(good/total*100):0;
+  const lv=seen===0?-1:pct>=80?3:pct>=60?2:pct>=30?1:0;
+  const lab=seen===0?'Pas encore commencé':['À retravailler','En progrès','Bien maîtrisé','Maîtrisé'][lv];
+  return `<div class="mast"><div class="l"><span><b>Maîtrise : ${pct} %</b> · ${lab}</span><span style="color:var(--mute)">${good} acquises / ${total} · ${seen} vues</span></div><div class="b"><i class="lv${Math.max(lv,0)}" style="width:${pct}%"></i></div></div>`;
+}
 function render(){
   const passed=get(),todo=DS.filter(d=>!passed.includes(d.id)),done=DS.filter(d=>passed.includes(d.id));
   const L=document.getElementById('list');
-  L.innerHTML=todo.length?todo.map(d=>`<div class="card ds"><h3>${d.title}</h3><p>${d.desc} · ${d.count} questions</p>
+  L.innerHTML=todo.length?todo.map(d=>`<div class="card ds"><h3>${d.title}</h3><p>${d.desc} · ${d.count} questions</p>${mastery(d)}
     <div class="row"><a class="btn" href="${d.page}">Réviser</a><button class="lnk" data-p="${d.id}">Matière passée</button></div></div>`).join(''):`<div class="card"><p class="center">Aucune matière à réviser 🎉</p></div>`;
   L.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
     if(b.dataset.c){set(get().concat(b.dataset.p));render();return}

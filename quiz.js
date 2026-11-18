@@ -1,6 +1,8 @@
 (function(){
 const D=window.QUIZ,CH=D.chapters,Q=D.q,app=document.getElementById('app');
 let state={};
+function qk(t){let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return String(h)}
+function rec(item,ok){try{const k='dsStats:'+D.id;const o=JSON.parse(localStorage.getItem(k)||'{}');o[qk(item[1])]=ok?1:0;localStorage.setItem(k,JSON.stringify(o))}catch(e){}}
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 function home(){
   const counts=CH.map((_,i)=>Q.filter(q=>q[0]===i).length);
@@ -34,6 +36,7 @@ function show(){
 }
 function answer(btn,ok,good,exp,item){
   document.querySelectorAll('.opt').forEach(b=>{b.disabled=true;if(b.textContent===good)b.classList.add('ok')});
+  rec(item,ok);
   if(ok)state.score++;else{btn.classList.add('ko');state.wrong.push({item,picked:btn.textContent})}
   document.getElementById('fb').innerHTML=`<div class="exp"><b class="${ok?'g':'r'}">${ok?'Correct !':'Raté.'}</b> ${exp}</div>`;
   const last=state.i+1>=state.pool.length;

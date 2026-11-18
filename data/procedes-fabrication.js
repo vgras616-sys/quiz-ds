@@ -1,4 +1,5 @@
 window.QUIZ={
+id:"procedes-fabrication",
 title:"Procédés de fabrication — Injection plastique & Fabrication additive",
 chapters:["Matières plastiques","Injection : procédé & cycle","Injection : technico-éco","Injection : conception","TD boîtier","FA : généralités","FA : procédés"],
 q:[
