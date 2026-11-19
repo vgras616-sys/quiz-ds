@@ -2,6 +2,14 @@
 const D=window.QUIZ,CH=D.chapters,Q=D.q,app=document.getElementById('app');
 let state={};
 function qk(t){let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return String(h)}
+function stats(){try{return JSON.parse(localStorage.getItem('dsScores:'+D.id)||'{}')}catch(e){return {}}}
+function pick(list,n){
+  // tirage pondéré : ratées (x4) > jamais vues (x3) > en cours (x2) > maîtrisées (x1, gardées pour la répétition)
+  const st=stats();
+  const w=q=>{const v=st[qk(q[1])];return v===undefined?3:v===0?4:v===1?2:1};
+  const sorted=list.map(q=>({q,k:Math.pow(Math.random(),1/w(q))})).sort((a,b)=>b.k-a.k).map(x=>x.q);
+  return n&&sorted.length>n?sorted.slice(0,n):sorted;
+}
 function rec(item,ok){try{const k='dsScores:'+D.id;const o=JSON.parse(localStorage.getItem(k)||'{}');const key=qk(item[1]);const v=o[key]||0;o[key]=ok?Math.min(2,Math.min(2,v)+1):0;localStorage.setItem(k,JSON.stringify(o))}catch(e){}}
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 function home(){
@@ -16,9 +24,7 @@ function home(){
   document.getElementById('go').onclick=()=>{
     const sel=[...app.querySelectorAll('.chap input')].filter(x=>x.checked).map(x=>+x.dataset.i);
     if(!sel.length)return;
-    let pool=shuffle(Q.filter(q=>sel.includes(q[0])));
-    if(n&&pool.length>n)pool=pool.slice(0,n);
-    start(pool);
+    start(pick(Q.filter(q=>sel.includes(q[0])),n));
   };
 }
 function start(pool){state={pool,i:0,score:0,wrong:[]};show()}
