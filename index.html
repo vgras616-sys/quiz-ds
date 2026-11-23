@@ -12,12 +12,18 @@ function get(){try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){r
 function set(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}
 const QZ={};
 function qk(t){let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return String(h)}
+function gbMastery(d){
+  let m={};try{m=(JSON.parse(localStorage.getItem('gb-dsblanc-v1')||'{}').mast)||{}}catch(e){}
+  let seen=0,pts=0;Object.keys(m).forEach(k=>{if(m[k].seen){seen++;pts+=(m[k].lw?0:Math.min(2,m[k].streak))}});
+  return {seen,pts,total:d.count};
+}
 function mastery(d){
   let st={};try{st=JSON.parse(localStorage.getItem('dsScores:'+d.id)||'{}')}catch(e){}
   const q=(window.QUIZ&&window.QUIZ.id===d.id)?window.QUIZ.q:null;
   const total=q?q.length:d.count;
   let seen=0,pts=0,acq=0;
-  if(q)q.forEach(x=>{let v=st[qk(x[1])];if(v!==undefined){v=Math.min(2,v);seen++;pts+=v;if(v>=2)acq++}});
+  if(d.custom){const g=gbMastery(d);seen=g.seen;pts=g.pts}
+  else if(q)q.forEach(x=>{let v=st[qk(x[1])];if(v!==undefined){v=Math.min(2,v);seen++;pts+=v;if(v>=2)acq++}});
   const pct=seen?Math.round(pts/(2*seen)*100):0;
   const cov=total?Math.round(seen/total*100):0;
   const lv=seen===0?-1:pct>=75?2:pct>=40?1:0;
