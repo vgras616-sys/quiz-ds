@@ -28,8 +28,8 @@ function instance(q){const idx=shuffle([0,1,2,3]);return{id:q.id,ch:q.ch,pts:q.p
 
 /* ---------- session ---------- */
 let S=null,timer=null;
-function start(mode,pool,n,minutes,label){
-  const list=(n>=pool.length?shuffle(pool):pickWeighted(pool,n)).map(instance);
+function start(mode,pool,n,minutes,label,pre){
+  const list=(pre||(n>=pool.length?shuffle(pool):pickWeighted(pool,n))).map(instance);
   S={mode,label,qs:list,i:0,ans:list.map(()=>null),flag:list.map(()=>false),done:list.map(()=>false),t0:Date.now(),end:minutes?Date.now()+minutes*60000:null,minutes};
   clearInterval(timer);
   if(S.end)timer=setInterval(tick,1000);
@@ -53,7 +53,7 @@ function home(){
   app.innerHTML=`
   <header class="hd"><a class="lnk" href="index.html">← Révisions DS</a><div class="eyebrow">ECAM · Amélioration continue · Green Belt Lean Six Sigma</div>
   <h1>DS blancs</h1>
-  <p class="lead">160 questions tirées du cours, des TD, des quiz et du DS 2022. Comme au DS : questions pondérées, <b>points négatifs</b>, pas de correction avant la fin.</p></header>
+  <p class="lead">${ALL.length} questions tirées du cours, des TD, des quiz et du DS 2022. Comme au DS : questions pondérées, <b>points négatifs</b>, pas de correction avant la fin.</p></header>
 
   <section class="card">
     <h2>Les règles du DS blanc</h2>
@@ -67,6 +67,13 @@ function home(){
     <label class="fl">Malus par mauvaise réponse
       <select id="ratio">${ratios.map(([v,l])=>`<option value="${v}"${Math.abs(v-r)<1e-6?' selected':''}>${l}</option>`).join('')}</select></label>
     <p class="hint">Avec 4 choix, répondre au hasard rapporte en moyenne ${sgn(0.25-0.75*r)} × les points de la question${Math.abs(r-1/3)<1e-6?' (nul : le malus est calibré pour décourager le hasard)':''}. Si tu peux éliminer 2 réponses, tenter devient rentable.</p>
+  </section>
+
+  <section class="card" style="border-color:#5eead4">
+    <h2>🎯 DS2 du 26 novembre 2026</h2>
+    <p class="hint">QCM Moodle de <b>70 questions</b>, répartition annoncée par M. Boisramé : tests d'hypothèse 18 · plans d'expériences 15 · SPC 15 · Gauge R&amp;R 14 · corrélation/régression 8. Les questions sont tirées dans ces 5 chapitres en favorisant tes erreurs. Durée réelle inconnue : 90 min par défaut.</p>
+    <label class="chk"><input type="checkbox" id="timer2" checked> Chronomètre (90 min)</label>
+    <button class="btn big primary wide" id="ds2">Lancer le DS2 blanc<small>70 questions · 5 thèmes</small></button>
   </section>
 
   <section class="card">
@@ -95,6 +102,7 @@ function home(){
   document.getElementById('ratio').onchange=e=>{mem.ratio=parseFloat(e.target.value);save();home()};
   app.querySelectorAll('[data-ds]').forEach(b=>b.onclick=()=>{const n=+b.dataset.ds;const t=document.getElementById('timer').checked;const m={20:25,30:40,40:55}[n];start('exam',ALL,n,t?m:0,'DS blanc '+n+' q.')});
   app.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>start('practice',ALL.filter(q=>q.ch===b.dataset.tr),+b.dataset.n,0,CH[b.dataset.tr].title));
+  document.getElementById('ds2').onclick=()=>{const plan={c9:18,c11:15,c12:15,c8:14,c10:8};let l=[];Object.keys(plan).forEach(c=>{l=l.concat(pickWeighted(ALL.filter(q=>q.ch===c),plan[c]))});start('exam',ALL,70,document.getElementById('timer2').checked?90:0,'DS2 du 26/11 (70 q.)',shuffle(l))};
   const rd=document.getElementById('redo');if(rd)rd.onclick=()=>start('practice',wrongList(),99,0,'Mes erreurs');
   document.getElementById('reset').onclick=()=>ask('Effacer toute ta progression et ton historique ?','Effacer',()=>{mem.mast={};mem.hist=[];save();home()});
   window.scrollTo(0,0);
