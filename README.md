@@ -7,6 +7,7 @@ Appli de révision pour téléphone, publiée avec GitHub Pages. Une page par DS
 | DS | Page | Fonctionnement |
 |---|---|---|
 | Procédés de fabrication | `procedes-fabrication.html` | Quiz (moteur commun `quiz.js`, questions dans `data/procedes-fabrication.js`) |
+| Supply Chain Management | `supply-chain.html` | Quiz (moteur commun `quiz.js`, questions dans `data/supply-chain.js`) |
 | Green Belt Lean Six Sigma | `green-belt.html` | DS blancs chronométrés avec points négatifs + entraînement par chapitre (`green-belt-app.js`, questions dans `data/green-belt.js`) |
 
 ## Structure
